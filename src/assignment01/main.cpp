@@ -69,8 +69,6 @@ int main()
      * COULD GO HERE *
      *~~~~~~~~~~~~~~~*/
 
-
-	vector<Point> linePoints;
 	Point lastPoint = (-1,-1);
 	float length = 0;
 
@@ -96,33 +94,11 @@ int main()
         // run visualizer - there may be no position
 		if (positions.size() != 0) 
 		{
-			for (auto &i : positions) 
+			for (auto &i : positions)
 			{
 				touchVisualizer.draw(touchFrame, i, touchFrame);
-				if (lastPoint == Point(-1,-1))
-				{
-					//user just started input
-					lastPoint = i.center;
-				}
-				linePoints.insert(end(linePoints), lastPoint - positions[0].center);
-				lastPoint = begin(positions).center;
+
 			}
-
-
-
-		}
-		else 
-		{
-			lastPoint = Point(-1,-1);
-			//user stopped inputting positions
-			for (auto &i : linePoints) 
-			{
-				length += norm(i);
-			}
-
-			length = length / 8;
-
-
 		}
 
         /*~~~~~~~~~~~*

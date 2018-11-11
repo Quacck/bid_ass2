@@ -66,6 +66,8 @@ int main()
 		{
             // track user's drawing using the path variable
             
+				path.push_back((&positions.front())->center);
+
             /*~~~~~~~~~~~*
              * YOUR CODE *
              * GOES HERE *
