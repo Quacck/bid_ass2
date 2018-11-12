@@ -30,6 +30,9 @@ int main()
     cv::Mat depthFrame;
     cv::Mat colorFrame;
     cv::Mat outputFrame;
+	cv::Mat simpleFrame;
+
+	std::vector<cv::Point2f> simplePath;
     auto running = true;
     std::vector<cv::Point2f> path;
 
@@ -76,6 +79,15 @@ int main()
         else
 		{
             // done drawing -> classify
+			if (path.size() > 0)
+			{
+				classifier.classify(path);
+				path.clear();
+			}
+
+
+			simplePath = classifier.getSimplifiedPath();
+			
 
             /*~~~~~~~~~~~*
              * YOUR CODE *
@@ -89,6 +101,8 @@ int main()
 
         // visualize results
         digitVisualizer.draw(colorFrame, path, outputFrame);
+		digitVisualizer.draw(colorFrame, simplePath, simpleFrame);
+
 
         // show frames
         auto depthFrameUnscaled = depthFrame.clone();
@@ -96,6 +110,8 @@ int main()
         cv::imshow("depth", depthFrame);
         cv::imshow("color", colorFrame);
         cv::imshow("output", outputFrame);
+		cv::imshow("simple", simpleFrame);
+
 
         // check for keypresses
         const auto key = cv::waitKey(10);

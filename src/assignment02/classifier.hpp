@@ -11,7 +11,7 @@ public:
     std::vector<cv::Point2f> getSimplifiedPath() const;
 private:
     const std::vector<Digit> c_dataSet;
-    const int c_simplifiedSize;
+    const int c_simplifiedSize = 8;
     const int c_k;
     int m_result = -1;
     std::vector<cv::Point2f> m_simplifiedPath;
