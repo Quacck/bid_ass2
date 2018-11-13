@@ -57,7 +57,7 @@ void Classifier::classify(const std::vector<cv::Point2f>& path)
 
 	std::vector<Digit> digits = dataSet.read("pendigits.tra");
 
-	float shortestDistance[8] = { 1000 };
+	std::vector<float> shortestDistance(8, 1000);
 	int pointFavorite[8];
 
 	if (m_simplifiedPath.size() == 8) 
@@ -147,27 +147,32 @@ void Classifier::simplify(std::vector<cv::Point2f> path)
 
 	length = length / c_simplifiedSize;
 	std::cout << length << std::endl;
-	float currentLength = length;
+	double currentLength = length;
 	cv::Vec2f currentVector = (0, 0);
 	m_simplifiedPath.push_back(path[0]);
 	std::cout << "start: " <<  m_simplifiedPath.back() << std::endl;
 
 	for (auto &i : pathAsVector)
-	{	
-		if (currentLength <= cv::norm(i)) {
-			m_simplifiedPath.push_back(path[0] + cv::Point2f(currentVector) + cv::Point2f(i/norm(i) * currentLength));
-			pathAsVector[(&i + sizeof(i) - &pathAsVector[0])/sizeof(i)] += cv::Vec2f(m_simplifiedPath.back());
+	{
+		double normi = cv::norm(i);
+		bool foundPoint = false;
+		while (currentLength <= normi) {
+			m_simplifiedPath.push_back(path[0] + cv::Point2f(currentVector) + cv::Point2f(i/normi * currentLength));
+			foundPoint = true;
+			i = i - (i / normi * currentLength);
 			currentLength = length;
 			//std::cout << currentVector;
 			std::cout << m_simplifiedPath.back() << std::endl;
-
+			normi = cv::norm(i);
 		}
-		else {
-			currentLength -= cv::norm(i);
+		if(!foundPoint) {
+			currentLength -= normi;
 		}
 		currentVector += i;
 	}
-	m_simplifiedPath.push_back(path.back());
+	if (m_simplifiedPath.size() < 8) {
+		m_simplifiedPath.push_back(path.back());
+	}
 	std::cout << "end: " <<  m_simplifiedPath.back() << std::endl;
 
 

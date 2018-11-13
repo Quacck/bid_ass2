@@ -79,29 +79,30 @@ int main()
         else
 		{
             // done drawing -> classify
-			if (path.size() > 0)
+			if (path.size() > 1)
 			{
 				classifier.classify(path);
 				path.clear();
-			}
 
 
-			simplePath = classifier.getSimplifiedPath();
+				simplePath = classifier.getSimplifiedPath();
 			
 
-            /*~~~~~~~~~~~*
-             * YOUR CODE *
-             * GOES HERE *
-             *~~~~~~~~~~~*/
+				/*~~~~~~~~~~~*
+				 * YOUR CODE *
+				 * GOES HERE *
+				 *~~~~~~~~~~~*/
 
-            // after classifying, you should update the visualizer like this:
-		    // digitVisualizer.setSimplifiedPath(classifier.getSimplifiedPath());
-		    // digitVisualizer.setResult(classifier.getResult());
+				// after classifying, you should update the visualizer like this:
+				digitVisualizer.setSimplifiedPath(classifier.getSimplifiedPath());
+				digitVisualizer.setResult(5/*classifier.getResult()*/);
+			}
+			path.clear();
 		}
 
         // visualize results
         digitVisualizer.draw(colorFrame, path, outputFrame);
-		digitVisualizer.draw(colorFrame, simplePath, simpleFrame);
+		//digitVisualizer.draw(colorFrame, simplePath, simpleFrame);
 
 
         // show frames
@@ -110,7 +111,7 @@ int main()
         cv::imshow("depth", depthFrame);
         cv::imshow("color", colorFrame);
         cv::imshow("output", outputFrame);
-		cv::imshow("simple", simpleFrame);
+		//cv::imshow("simple", simpleFrame);
 
 
         // check for keypresses
