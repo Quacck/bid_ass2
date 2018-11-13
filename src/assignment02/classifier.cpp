@@ -156,7 +156,7 @@ void Classifier::simplify(std::vector<cv::Point2f> path)
 	{	
 		if (currentLength <= cv::norm(i)) {
 			m_simplifiedPath.push_back(path[0] + cv::Point2f(currentVector) + cv::Point2f(i/norm(i) * currentLength));
-			pathAsVector[(&i + sizeof(i) - &pathAsVector[0])/sizeof(i)] += cv::Vec2f(m_simplifiedPath.back());
+			pathAsVector[(&i + sizeof(i) - &pathAsVector[0])/sizeof(i)] += i - (i / norm(i) * currentLength);
 			currentLength = length;
 			//std::cout << currentVector;
 			std::cout << m_simplifiedPath.back() << std::endl;
