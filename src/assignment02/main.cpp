@@ -95,14 +95,13 @@ int main()
 
 				// after classifying, you should update the visualizer like this:
 				digitVisualizer.setSimplifiedPath(classifier.getSimplifiedPath());
-				digitVisualizer.setResult(5/*classifier.getResult()*/);
+				digitVisualizer.setResult(classifier.getResult());
 			}
 			path.clear();
 		}
 
         // visualize results
         digitVisualizer.draw(colorFrame, path, outputFrame);
-		//digitVisualizer.draw(colorFrame, simplePath, simpleFrame);
 
 
         // show frames

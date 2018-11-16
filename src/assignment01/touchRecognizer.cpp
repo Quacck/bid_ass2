@@ -26,7 +26,7 @@ void TouchRecognizer::calibrate(const cv::Mat& background)
 	}
 
 	backgroundDepth = depth;
-	cout << backgroundDepth;
+	//cout << backgroundDepth;
 }
 
 std::vector<cv::RotatedRect> TouchRecognizer::recognize(const cv::Mat& depthFrame) const

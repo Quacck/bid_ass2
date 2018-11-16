@@ -16,4 +16,5 @@ private:
     int m_result = -1;
     std::vector<cv::Point2f> m_simplifiedPath;
     void simplify(std::vector<cv::Point2f> path);
+	float similarity(std::vector<cv::Point> firstPath, std::vector<cv::Point2f> secondPath);
 };

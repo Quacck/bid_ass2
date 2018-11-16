@@ -7,11 +7,26 @@
 #include "data.hpp"
 
 
+struct similarityAndLabel {
+	float sim;
+	int label;
+};
+
 Classifier::Classifier(std::vector<Digit> dataSet, const int k)
 : c_dataSet(std::move(dataSet))
 , c_simplifiedSize(c_dataSet.front().points().size())
 , c_k(k)
 {
+}
+
+float Classifier::similarity(const std::vector<cv::Point> firstPath, const std::vector<cv::Point2f> secondPath)
+{
+	float sumOfDistance = 0;
+	for (int i = 0; i < firstPath.size(); i++)
+	{
+		sumOfDistance += cv::norm((cv::Point2f)firstPath[i] - secondPath[i]);
+	}
+	return sumOfDistance;
 }
 
 void Classifier::classify(const std::vector<cv::Point2f>& path)
@@ -28,6 +43,7 @@ void Classifier::classify(const std::vector<cv::Point2f>& path)
 	cv::Point2f topLeft = m_simplifiedPath[0];
 	cv::Point2f btmRight = m_simplifiedPath[0];
 
+	std::vector<cv::Point2f> normalizedPath(m_simplifiedPath);
 
 	for (auto &i : m_simplifiedPath)
 	{
@@ -48,64 +64,74 @@ void Classifier::classify(const std::vector<cv::Point2f>& path)
 			btmRight.y = i.y;
 		}
 	}
+
 	//normalize that to 100x100 and mirror vertically
-	for (auto &i : m_simplifiedPath)
+	for (auto &i : normalizedPath)
 	{
 		i.x = ((i.x - topLeft.x) / (btmRight.x - topLeft.x)) * 100;
 		i.y = 100 - ((i.y - topLeft.y) / (btmRight.y - topLeft.y)) * 100;
 	}
 
-	std::vector<Digit> digits = dataSet.read("pendigits.tra");
+	//::vector<Digit> digits = dataSet.read("pendigits.tra");
 
-	std::vector<float> shortestDistance(8, 1000);
-	int pointFavorite[8];
+	similarityAndLabel element;
+	element.sim = 1000;
+	element.label = -1;
 
-	if (m_simplifiedPath.size() == 8) 
+	float maxSim = 0;
+	int maxPosition = 0;
+
+	std::vector<similarityAndLabel> knnVector(c_k,element);
+
+	if (normalizedPath.size() == 8) 
 	{
-		for (auto &i : digits)
+		for (auto &dataEntry : c_dataSet)
 		{
-			for (int j = 0; j < 8; j++)
-			{
-				if (shortestDistance[j] > cv::norm((cv::Vec2f)((cv::Point2f)(i.points()[j]) - m_simplifiedPath[j])))
+			maxSim = 0;
+			element.sim = similarity(dataEntry.points(), normalizedPath);
+			element.label = dataEntry.label();
+		
+			for (int i = 0; i < knnVector.size(); i++) 
+			{	
+				if (knnVector[i].sim > maxSim)
 				{
-					shortestDistance[j] = cv::norm((cv::Vec2f)((cv::Point2f)(i.points()[j]) - m_simplifiedPath[j]));
-					std::cout << i.label() << std::endl;
-					pointFavorite[j] = i.label();
+					maxSim = knnVector[i].sim;
+					maxPosition = i;
 				}
+				
 			}
+
+			if (element.sim <= maxSim)
+			{
+				knnVector[maxPosition] = element;
+			}
+
 		}
+
 	}
 	else
 	{
-		std::cout << "this didnt work whoops :(";
+		std::cout << "not 8 elements";
 	}
 
-	
-	
-	
-	
-	for (auto &i : pointFavorite)
+	std::vector<int>numberCounter (10, 0);
+	for (int i = 0; i < c_k; i++)
 	{
-		std::cout << i << std::endl;
-
+		numberCounter[knnVector[i].label]++;
 	}
 
+	int max = 0;
+	for (int i = 0; i < numberCounter.size(); i++)
+	{
+		if (max < numberCounter[i])
+		{
+			max = numberCounter[i];
+			maxPosition = i;
+		}
+	}
 
+	m_result = maxPosition;
 
-    /*~~~~~~~~~~~*
-     * YOUR CODE *
-     * GOES HERE *
-     *~~~~~~~~~~~*/
-
-    // match using knn
-
-    /*~~~~~~~~~~~*
-     * YOUR CODE *
-     * GOES HERE *
-     *~~~~~~~~~~~*/
-
-    // you should store your result in m_result
-    // m_result = ...
 }
 
 int Classifier::getResult() const
@@ -136,7 +162,7 @@ void Classifier::simplify(std::vector<cv::Point2f> path)
 		{
 
 			pathAsVector.push_back(cv::Vec2f((i - lastPoint ).x, (i - lastPoint).y));
-			std::cout << pathAsVector.back() << std::endl;
+			//std::cout << pathAsVector.back() << std::endl;
 			lastPoint = i;
 			length += cv::norm(pathAsVector.back());
 		}
@@ -146,30 +172,24 @@ void Classifier::simplify(std::vector<cv::Point2f> path)
 
 
 	length = length / c_simplifiedSize;
-	std::cout << length << std::endl;
+	//std::cout << length << std::endl;
 	double currentLength = length;
 	cv::Vec2f currentVector = (0, 0);
 	m_simplifiedPath.push_back(path[0]);
-	std::cout << "start: " <<  m_simplifiedPath.back() << std::endl;
+	//std::cout << "start: " <<  m_simplifiedPath.back() << std::endl;
 
-	for (auto &i : pathAsVector)
-<<<<<<< HEAD
+	for (auto &i : pathAsVector)	
 	{
 		double normi = cv::norm(i);
 		bool foundPoint = false;
-		while (currentLength <= normi) {
+		while (currentLength <= normi) 
+		{
 			m_simplifiedPath.push_back(path[0] + cv::Point2f(currentVector) + cv::Point2f(i/normi * currentLength));
 			foundPoint = true;
 			i = i - (i / normi * currentLength);
-=======
-	{	
-		if (currentLength <= cv::norm(i)) {
-			m_simplifiedPath.push_back(path[0] + cv::Point2f(currentVector) + cv::Point2f(i/norm(i) * currentLength));
-			pathAsVector[(&i + sizeof(i) - &pathAsVector[0])/sizeof(i)] += i - (i / norm(i) * currentLength);
->>>>>>> 30200ab81bc6e51857f6ebeca14fc7f20f647dc2
 			currentLength = length;
 			//std::cout << currentVector;
-			std::cout << m_simplifiedPath.back() << std::endl;
+			//std::cout << m_simplifiedPath.back() << std::endl;
 			normi = cv::norm(i);
 		}
 		if(!foundPoint) {
@@ -180,10 +200,10 @@ void Classifier::simplify(std::vector<cv::Point2f> path)
 	if (m_simplifiedPath.size() < 8) {
 		m_simplifiedPath.push_back(path.back());
 	}
-	std::cout << "end: " <<  m_simplifiedPath.back() << std::endl;
+	//std::cout << "end: " <<  m_simplifiedPath.back() << std::endl;
 
 
-	std::cout << "Anzahl: " << m_simplifiedPath.size() << std::endl;
+	//std::cout << "Anzahl: " << m_simplifiedPath.size() << std::endl;
 
 	//we got 8 points
 
